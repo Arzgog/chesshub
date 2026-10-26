@@ -1,0 +1,14 @@
+<div class="auth-container">
+    <div class="auth-card">
+      <h2>Chess Engine Login</h2>
+      
+      <div class="input-group">
+        <input type="text" #usernameInput placeholder="Enter username..." />
+        <button (click)="onLogin(usernameInput.value)" class="btn primary">Sign Up / Login</button>
+      </div>
+  
+      <div class="divider">OR</div>
+  
+      <button (click)="authService.loginAsGuest()" class="btn guest">Play as Guest</button>
+    </div>
+  </div>

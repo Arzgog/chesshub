@@ -1,0 +1,195 @@
+<!-- ONLINE MULTIPLAYER LOBBY / WAITING SCREEN -->
+@if (isOnlineMode && !isConnected) {
+  <div class="lobby-overlay">
+    <div class="lobby-card">
+      <h3>Online Multiplayer Lobby</h3>
+      
+      @if (!myPeerId) {
+        <p class="status-text">Connecting to matchmaking server...</p>
+      } @else if (!waitingForOpponent) {
+        <p>Your Room Code:</p>
+        <div class="code-box">{{ myPeerId }}</div>
+        
+        <!-- Timer Selector inside Lobby -->
+        <div style="margin: 12px 0; text-align: left;">
+          <label style="font-size: 0.8rem; color: #94a3b8; display: block; margin-bottom: 4px;">Time Control:</label>
+          <div style="display: flex; gap: 6px;">
+            <button class="time-btn" style="flex: 1; padding: 6px; font-size: 0.8rem;" [class.active-time]="selectedTimerMinutes === 1" (click)="setTimeControl(1)">1 Min</button>
+            <button class="time-btn" style="flex: 1; padding: 6px; font-size: 0.8rem;" [class.active-time]="selectedTimerMinutes === 10" (click)="setTimeControl(10)">10 Min</button>
+            <button class="time-btn" style="flex: 1; padding: 6px; font-size: 0.8rem;" [class.active-time]="selectedTimerMinutes === 30" (click)="setTimeControl(30)">30 Min</button>
+          </div>
+        </div>
+
+        <button class="action-btn" (click)="hostMatch()">Host Match (Play as White)</button>
+        
+        <div class="divider">OR JOIN FRIEND</div>
+        <div class="join-row">
+          <input type="text" [(ngModel)]="remotePeerIdInput" placeholder="Paste Room Code" class="room-input">
+          <button class="action-btn join-btn" (click)="joinMatch()">Join</button>
+        </div>
+      }
+
+      @if (waitingForOpponent) {
+        <div class="waiting-container">
+          <div class="spinner"></div>
+          <p class="waiting-text">Waiting for opponent to join...</p>
+          <p class="sub-text">Send your room code: <strong>{{ myPeerId }}</strong></p>
+          
+          <button class="action-btn" style="margin-top: 16px; background: #059669; font-size: 0.9rem;" (click)="bypassWaitingForDemo()">
+            ▶ Start Game Now (Demo Mode)
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<div class="chess-container"> 
+
+  <!-- TOP SETTINGS PANEL (Strength & Time Controls) -->
+  <div class="time-controls-panel">
+    @if (!isOnlineMode) {
+      <select class="time-btn" 
+              [disabled]="isGameStarted" 
+              (change)="onStrengthChange($event)">
+        <option value="1">Strength 1 (Beginner)</option>
+        <option value="2">Strength 2 (Easy)</option>
+        <option value="3" selected>Strength 3 (Medium)</option>
+        <option value="4">Strength 4 (Hard)</option>
+        <option value="5">Strength 5 (Master)</option>
+      </select>
+    }
+
+    <button class="time-btn" 
+            [class.active-time]="selectedTimerMinutes === 1" 
+            [disabled]="isGameStarted"
+            (click)="setTimeControl(1)">
+      1 Min (Blitz)
+    </button>
+    
+    <button class="time-btn" 
+            [class.active-time]="selectedTimerMinutes === 10" 
+            [disabled]="isGameStarted"
+            (click)="setTimeControl(10)">
+      10 Min (Rapid)
+    </button>
+    
+    <button class="time-btn" 
+            [class.active-time]="selectedTimerMinutes === 30" 
+            [disabled]="isGameStarted"
+            (click)="setTimeControl(30)">
+      30 Min (Classic)
+    </button>
+  </div>
+
+  <!-- Top Player Banner (Black / Engine) -->
+  <div class="player-card" [class.active-turn]="playerColor === Color.Black">
+    <div class="player-avatar black-avatar">B</div>
+    <div class="player-info">
+      <span class="player-name">{{ blackPlayerLabel }}</span>
+      @if (playerColor === Color.Black) {
+        <span class="player-status">Thinking...</span>
+      }
+    </div>
+    @if (engineMaterialAdvantage) {
+      <div class="advantage-badge engine-badge">
+        {{ engineMaterialAdvantage }}
+      </div>
+    }
+    <div class="timer-badge">
+      {{ blackTimeFormatted }}
+    </div>
+  </div>
+
+  <!-- Board Frame -->
+  <div class="board-frame">
+    <div class="chess-board">
+      @for (row of displayedBoardView; track $index; let x = $index) {
+        <div class="row">
+          @for (piece of row; track $index; let y = $index) {
+            <div class="square" 
+                 [ngClass]="{
+                   'dark': isSquareDark(x, y), 
+                   'light': !isSquareDark(x, y),
+                   'selected-square': isSquareSelected(x, y),
+                   'promotion-square': isSquarePromotionSquare(x, y),
+                   'checked-square': isSquareChecked(x, y)
+                 }" 
+                 (click)="move(x, y)">
+
+              <div class="square-container">
+                @if (isSquareSafeForSelectedPiece(x, y) && !piece) {
+                  <div class="move-indicator-dot"></div>
+                }
+
+                @if (isSquareSafeForSelectedPiece(x, y) && piece) {
+                  <div class="capture-indicator-ring"></div>
+                }
+
+                @if (piece) {
+                  <img [src]="pieceImagePaths[piece]" [alt]="piece" class="piece">
+                }
+              </div>
+
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    @if (isPromotionActive) {
+      <div class="promotion-dialog">
+        @for (piece of promotionPieces(); track piece) {
+          <img [src]="pieceImagePaths[piece]" 
+               [alt]="piece"
+               (click)="promotePiece(piece)">
+        }
+
+        <span class="close-promotion-dialog" (click)="closePawnPromotionDialog()">&times;</span>
+      </div>
+    }
+
+    @if (gameOverMessage || timeOutWinnerMessage) {
+      <div class="game-over-overlay">
+        <div class="game-over-card">
+          <h2>Game Over</h2>
+          <p>{{ gameOverMessage || timeOutWinnerMessage }}</p>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Bottom Player Banner (White / You) -->
+  <div class="player-card" [class.active-turn]="playerColor === Color.White">
+    <div class="player-avatar white-avatar">W</div>
+    <div class="player-info">
+      <span class="player-name">{{ whitePlayerLabel }}</span>
+      @if (playerColor === Color.White) {
+        <span class="player-status">Your Turn</span>
+      }
+    </div>
+    @if (playerMaterialAdvantage) {
+      <div class="advantage-badge player-badge">
+        {{ playerMaterialAdvantage }}
+      </div>
+    }
+    <div class="timer-badge">
+      {{ whiteTimeFormatted }}
+    </div>
+  </div>
+
+  <!-- MOVE HISTORY DISPLAY -->
+  <div class="move-history-container">
+    <div class="move-history-header">Moves</div>
+    <div class="move-list">
+      @for (move of moveList; track $index) {
+        <div class="move-pair">
+          <span class="move-number">{{ $index + 1 }}.</span>
+          <span class="white-move">{{ move[0] }}</span>
+          <span class="black-move">{{ move[1] || '' }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+</div>

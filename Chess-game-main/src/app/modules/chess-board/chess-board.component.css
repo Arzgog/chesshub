@@ -1,0 +1,566 @@
+/* ==========================================================================
+   1. MAIN CONTAINER & TIME CONTROLS
+   ========================================================================== */
+   .chess-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    user-select: none;
+    padding: 16px 12px 40px 12px;
+    width: 100%;
+    min-height: 100vh;
+    box-sizing: border-box;
+  }
+  
+  /* Top Settings Panel (Strength & Time) */
+  .time-controls-panel {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    width: min(100%, 480px);
+    flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+  
+  .time-btn {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 6px;
+    border: 1px solid #334155;
+    background-color: #0f172a;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  
+    &:hover:not(:disabled) {
+      color: #ffffff;
+      border-color: #38bdf8;
+    }
+  
+    &.active-time {
+      background-color: #0284c7;
+      color: #ffffff;
+      border-color: #38bdf8;
+    }
+  
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+  
+  /* ==========================================================================
+     2. PLAYER BANNERS & TIMERS
+     ========================================================================== */
+  .player-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: min(100%, 480px);
+    padding: 8px 16px;
+    margin: 6px 0;
+    border-radius: 8px;
+    background-color: #1e293b;
+    color: #fff;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    flex-shrink: 0;
+  
+    &.active-turn {
+      border-left: 4px solid #38bdf8;
+      background-color: #334155;
+    }
+  }
+  
+  .player-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    flex-shrink: 0;
+  
+    &.black-avatar {
+      background-color: #0f172a;
+      color: #fff;
+      border: 1px solid #475569;
+    }
+  
+    &.white-avatar {
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+  }
+  
+  .player-info {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .player-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+  
+  .player-status {
+    font-size: 0.8rem;
+    color: #38bdf8;
+  }
+  
+  /* Material Advantage Badges */
+  .advantage-badge {
+    margin-left: auto;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  
+    &.player-badge {
+      background-color: #0284c7;
+      color: #ffffff;
+    }
+  
+    &.engine-badge {
+      background-color: #ea580c;
+      color: #ffffff;
+    }
+  }
+  
+  /* Clock Badge */
+  .timer-badge {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.05rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background-color: #0f172a;
+    color: #f8fafc;
+    border: 1px solid #334155;
+  
+    &:first-of-type {
+      margin-left: auto;
+    }
+  }
+  
+  /* ==========================================================================
+     3. BOARD FRAME & CHESS GRID (Responsive & Vertical Friendly)
+     ========================================================================== */
+  .board-frame {
+    position: relative;
+    width: min(100%, 410px, 58vh);
+    aspect-ratio: 1 / 1;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 4px solid #1e293b;
+    box-sizing: border-box;
+    flex-shrink: 0;
+  }
+  
+  .chess-board {
+    display: flex;
+    flex-direction: column-reverse;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .row {
+    display: flex;
+    flex: 1;
+    width: 100%;
+  }
+  
+  .square {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    aspect-ratio: 1 / 1;
+  }
+  
+  /* Board Color Theme (Steel Blue) */
+  .light {
+    background-color: #dee3e6;
+  }
+  
+  .dark {
+    background-color: #4682b4;
+  }
+  
+  /* Square States & Highlights */
+  .selected-square {
+    background-color: #7dd3fc !important;
+  }
+  
+  .checked-square {
+    background-color: #f43f5e !important;
+    box-shadow: inset 0 0 10px rgba(159, 18, 57, 0.8);
+  }
+  
+  .promotion-square {
+    background-color: #a5f3fc !important;
+  }
+  
+  /* ==========================================================================
+     4. PIECES & MOVE INDICATORS
+     ========================================================================== */
+  .square-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .piece {
+    width: 78%;
+    height: 78%;
+    max-width: 44px;
+    max-height: 44px;
+    object-fit: contain;
+    z-index: 2;
+    pointer-events: none;
+  }
+  
+  /* Move Dot (Empty Target Square) */
+  .move-indicator-dot {
+    position: absolute;
+    width: 26%;
+    height: 26%;
+    background-color: rgba(14, 165, 233, 0.65);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 3;
+  }
+  
+  /* Capture Ring (Enemy Target Square) */
+  .capture-indicator-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 5px solid rgba(14, 165, 233, 0.65);
+    border-radius: 50%;
+    pointer-events: none;
+    box-sizing: border-box;
+    z-index: 3;
+  }
+  
+  /* ==========================================================================
+     5. OVERLAYS & MODALS
+     ========================================================================== */
+  .promotion-dialog {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: #ffffff;
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    z-index: 10;
+  
+    img {
+      width: 48px;
+      height: 48px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: transform 0.15s ease, background-color 0.15s ease;
+  
+      &:hover {
+        transform: scale(1.15);
+        background-color: #f1f5f9;
+      }
+    }
+  }
+  
+  .close-promotion-dialog {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+  
+    &:hover {
+      color: #0f172a;
+    }
+  }
+  
+  .game-over-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(15, 23, 42, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+  }
+  
+  .game-over-card {
+    background-color: #ffffff;
+    padding: 24px 32px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  
+    h2 {
+      margin: 0 0 8px 0;
+      color: #0f172a;
+    }
+  
+    p {
+      margin: 0;
+      color: #475569;
+      font-size: 1.05rem;
+    }
+  }
+  
+  /* ==========================================================================
+     6. MOVE HISTORY DISPLAY
+     ========================================================================== */
+  .move-history-container {
+    width: min(100%, 480px);
+    margin-top: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background-color: #1e293b;
+    border: 1px solid #334155;
+    box-sizing: border-box;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+    height: 110px;         
+    max-height: 110px;
+    flex-shrink: 0;
+  }
+  
+  .move-history-header {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #94a3b8;
+    border-bottom: 1px solid #334155;
+    padding-bottom: 4px;
+    margin-bottom: 6px;
+    flex-shrink: 0;        
+  }
+  
+  .move-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    flex: 1;
+    overflow-y: auto;      
+    padding-right: 4px;
+  
+    &::-webkit-scrollbar {
+      width: 5px;
+    }
+  
+    &::-webkit-scrollbar-track {
+      background: #0f172a;
+      border-radius: 4px;
+    }
+  
+    &::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+  
+      &:hover {
+        background: #475569;
+      }
+    }
+  }
+  
+  .move-pair {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background-color: #0f172a;
+    border: 1px solid #334155;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.85rem;
+    font-weight: 600;
+    height: fit-content;
+  }
+  
+  .move-number {
+    color: #64748b;
+    font-size: 0.8rem;
+  }
+  
+  .white-move {
+    color: #f8fafc;
+  }
+  
+  .black-move {
+    color: #cbd5e1;
+  }
+  
+  /* ==========================================================================
+     7. ONLINE MULTIPLAYER LOBBY OVERLAY & WAITING SPINNER
+     ========================================================================== */
+  .lobby-overlay {
+    position: fixed;
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    background: rgba(15, 23, 42, 0.92);
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    z-index: 1000; 
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  
+  .lobby-card {
+    background: #1e293b; 
+    border: 1px solid #334155; 
+    padding: 32px;
+    border-radius: 12px; 
+    width: 100%; 
+    max-width: 400px; 
+    text-align: center; 
+    color: #fff;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+  }
+  
+  .lobby-card h3 { 
+    color: #38bdf8; 
+    margin-top: 0;
+    margin-bottom: 16px; 
+    font-size: 1.25rem;
+  }
+  
+  .status-text {
+    color: #94a3b8;
+    font-size: 0.95rem;
+  }
+  
+  .code-box {
+    background: #0f172a; 
+    border: 1px dashed #38bdf8; 
+    color: #38bdf8;
+    padding: 12px; 
+    font-family: monospace; 
+    font-size: 1.3rem; 
+    font-weight: bold;
+    border-radius: 6px; 
+    margin: 10px 0 16px 0;
+    letter-spacing: 1px;
+  }
+  
+  .action-btn {
+    background: #0284c7; 
+    color: #fff; 
+    border: none; 
+    padding: 12px 16px;
+    font-weight: 600; 
+    font-size: 0.95rem;
+    border-radius: 6px; 
+    cursor: pointer; 
+    width: 100%; 
+    transition: background 0.2s ease;
+  
+    &:hover { 
+      background: #0369a1; 
+    }
+  }
+  
+  .divider { 
+    margin: 18px 0; 
+    color: #64748b; 
+    font-size: 0.8rem; 
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  
+  .join-row { 
+    display: flex; 
+    gap: 8px; 
+  }
+  
+  .room-input {
+    flex: 1; 
+    padding: 10px 12px; 
+    border-radius: 6px; 
+    border: 1px solid #475569; 
+    background: #0f172a; 
+    color: #fff;
+    font-size: 0.95rem;
+    outline: none;
+  
+    &:focus {
+      border-color: #38bdf8;
+    }
+  }
+  
+  .join-btn { 
+    width: auto; 
+    background: #334155; 
+    padding: 0 18px;
+  
+    &:hover { 
+      background: #475569; 
+    }
+  }
+  
+  .waiting-container { 
+    margin-top: 16px; 
+  }
+  
+  .spinner {
+    width: 40px; 
+    height: 40px; 
+    border: 4px solid #334155; 
+    border-top: 4px solid #38bdf8;
+    border-radius: 50%; 
+    animation: spin 0.8s linear infinite; 
+    margin: 0 auto 14px auto;
+  }
+  
+  @keyframes spin { 
+    0% { transform: rotate(0deg); } 
+    100% { transform: rotate(360deg); } 
+  }
+  
+  .waiting-text { 
+    color: #38bdf8; 
+    font-weight: 600; 
+    font-size: 1.05rem; 
+    margin: 0 0 6px 0;
+  }
+  
+  .sub-text { 
+    color: #94a3b8; 
+    font-size: 0.85rem; 
+    margin: 0; 
+    
+    strong {
+      color: #f8fafc;
+      font-family: monospace;
+    }
+  }
